@@ -1,7 +1,95 @@
 import itertools
 import copy
 
-def findStability(chart):
+def checkAdjacentSeats(phase, top, bottom, left, right, r, c):
+    seatStatus = []
+    if (r != top):
+        seatStatus.append(phase[r-1][c])
+    if (r != bottom):
+        seatStatus.append(phase[r+1][c])
+    if (c != left):
+        seatStatus.append(phase[r][c-1])
+    if (c != right):
+        seatStatus.append(phase[r][c+1])
+    if (r != top and c != left):
+        seatStatus.append(phase[r-1][c-1])
+    if (r != top and c != right):
+        seatStatus.append(phase[r-1][c+1])
+    if (r != bottom and c != left):
+        seatStatus.append(phase[r+1][c-1])
+    if (r != bottom and c != right):
+        seatStatus.append(phase[r+1][c+1])
+
+    return seatStatus
+
+def checkLineOfSight(phase, top, bottom, left, right, row, col):
+    seatStatus = []
+
+    r,c = row,col
+    while r != top:
+        if phase[r-1][c] == '.':
+            r -= 1
+            continue;
+        seatStatus.append(phase[r-1][c])
+        break
+    r,c = row,col
+    while r != bottom:
+        if phase[r+1][c] == '.':
+            r += 1
+            continue;
+        seatStatus.append(phase[r+1][c])
+        break
+    r,c = row,col
+    while c != left:
+        if phase[r][c-1] == '.':
+            c -= 1
+            continue;
+        seatStatus.append(phase[r][c-1])
+        break
+    r,c = row,col
+    while c != right:
+        if phase[r][c+1] == '.':
+            c += 1
+            continue;
+        seatStatus.append(phase[r][c+1])
+        break
+    r,c = row,col
+    while r != top and c != left:
+        if phase[r-1][c-1] == '.':
+            r -= 1
+            c -= 1
+            continue;
+        seatStatus.append(phase[r-1][c-1])
+        break
+    r,c = row,col
+    while r != bottom and c != right:
+        if phase[r+1][c+1] == '.':
+            r += 1
+            c += 1
+            continue;
+        seatStatus.append(phase[r+1][c+1])
+        break
+    r,c = row,col
+    while r != top and c != right:
+        if phase[r-1][c+1] == '.':
+            r -= 1
+            c += 1
+            continue;
+        seatStatus.append(phase[r-1][c+1])
+        break
+    r,c = row,col
+    while r != bottom and c != left:
+        if phase[r+1][c-1] == '.':
+            r += 1
+            c -= 1
+            continue;
+        seatStatus.append(phase[r+1][c-1])
+        break
+
+    return seatStatus
+
+
+def findStability(chart, lineOfSight=False):
     topEnd = 0
     bottomEnd = len(chart) - 1
     leftEnd = 0
@@ -9,6 +97,8 @@ def findStability(chart):
 
     lastPhase = copy.deepcopy(chart)
     thisPhase = None
+
+    occupationThreshold = 5 if lineOfSight else 4
     
     while lastPhase != thisPhase:
     # i = 0
@@ -29,30 +119,17 @@ def findStability(chart):
             if lastPhase[r][c] == '.':
                 continue
 
-            adjacent = []
-            if (r != topEnd):
-                adjacent.append(lastPhase[r-1][c])
-            if (r != bottomEnd):
-                adjacent.append(lastPhase[r+1][c])
-            if (c != leftEnd):
-                adjacent.append(lastPhase[r][c-1])
-            if (c != rightEnd):
-                adjacent.append(lastPhase[r][c+1])
-            if (r != topEnd and c != leftEnd):
-                adjacent.append(lastPhase[r-1][c-1])
-            if (r != topEnd and c != rightEnd):
-                adjacent.append(lastPhase[r-1][c+1])
-            if (r != bottomEnd and c != leftEnd):
-                adjacent.append(lastPhase[r+1][c-1])
-            if (r != bottomEnd and c != rightEnd):
-                adjacent.append(lastPhase[r+1][c+1])
+            if lineOfSight:
+                seatCheck = checkLineOfSight(lastPhase, topEnd, bottomEnd, leftEnd, rightEnd, r, c)
+            else:
+                seatCheck = checkAdjacentSeats(lastPhase, topEnd, bottomEnd, leftEnd, rightEnd, r, c)
 
-            if lastPhase[r][c] == 'L' and adjacent.count('#') == 0:
+            if lastPhase[r][c] == 'L' and seatCheck.count('#') == 0:
                 thisPhase[r][c] = '#'
-            elif lastPhase[r][c] == '#' and adjacent.count('#') >= 4:
+            elif lastPhase[r][c] == '#' and seatCheck.count('#') >= occupationThreshold:
                 thisPhase[r][c] = 'L'
 
-            # print(lastPhase[r][c], '-', adjacent)
+            # print(lastPhase[r][c], '-', seatCheck)
 
         # print('this\n')
         # for r in thisPhase:
@@ -61,6 +138,8 @@ def findStability(chart):
     occupiedSeats = sum([row.count('#') for row in thisPhase])
     return occupiedSeats
 
+#################################
+
 # seats = [list(x.strip('\n')) for x in open('test1.txt')]
 # seats = [list(x.strip('\n')) for x in open('test2.txt')]
 seats = [list(x.strip('\n')) for x in open('seating.txt')]
@@ -68,3 +147,6 @@ seats = [list(x.strip('\n')) for x in open('seating.txt')]
 
 endSeatsOccupied = findStability(seats)
 print('stable, occupied seats =>', endSeatsOccupied)
+
+losSeatsOccupied = findStability(seats, True)
+print('stable, line of sight, occupied seats =>', losSeatsOccupied)
