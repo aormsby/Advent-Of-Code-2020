@@ -1,4 +1,4 @@
-import math
+from functools import reduce
 
 def readSchedule(filename):
     with open(filename) as table:
@@ -12,27 +12,37 @@ def catchEarliestBus(time, schedule):
     busID = schedule[waitTimes.index(wait)]
     return busID, wait
 
-# def findGCD(x,y):
-#     while y:
-#         x, y = y, x % y
-#     return x
+def modMultInverse(a, mod):
+    b = a % mod
+    for x in range(0, mod):
+        if (b * x) % mod == 1:
+            return x
 
-# def findLCM(x,y):
-#     return (x*y)//findGCD(x,y)
+def chineseRemainder(n, a):
+    N = reduce(lambda a,b: a*b, n)
+    # print(N)  # 4199
+    
+    sum = 0
+    for n_i, a_i in zip(n, a):
+        Np = N // n_i
+        sum += a_i * modMultInverse(Np, n_i) * Np
+    
+    return (N % sum)-(sum % N)
 
 def findOffsetDepartures(schedule):
-    baseInts = [n for n in schedule if n != 'x']
+    data = {schedule.index(n):n for n in schedule if n != 'x'}
+    # print(data)
     
-    # baseInts = [n for n in schedule if n != 'x']
-    # # intsIndex = [schedule.index(n) for n in schedule if n != 'x']
-    # maxID = max(baseInts)
-    # # print(baseInts)
-    # # print(intsIndex)
+    x = chineseRemainder(list(data.values()), list(data.keys()))
+    return x
+    
+
 
 #####
 
-earliestTime, busSchedule = readSchedule('test1.txt')
-# earliestTime, busSchedule = readSchedule('busSchedule.txt')
+# earliestTime, busSchedule = readSchedule('test1.txt')
+# earliestTime, busSchedule = readSchedule('test2.txt')
+earliestTime, busSchedule = readSchedule('busSchedule.txt')
 # print(earliestTime)
 # print(busSchedule)
 
@@ -50,4 +60,4 @@ for t in busSchedule:
 # print(mixedSchedule)
 
 offsetTimestamp = findOffsetDepartures(mixedSchedule)
-# print(offsetTimestamp)
+print('sequence offset:', offsetTimestamp)
