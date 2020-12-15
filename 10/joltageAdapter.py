@@ -53,7 +53,7 @@ def dfsIterative(branch, start, end, pathCount=0):
     
     return pathCount
 
-def findPermutations(branches):
+def findCombinations(branches):
     subPaths = []
     for b in branches:
         adjList = makeAdjacencyList(b)
@@ -79,6 +79,6 @@ diffs, branches = mapJoltageDiffs(joltageList)
 diffsProduct = reduce(lambda a,b: a*b, diffs.values())
 print('diffs product =>', diffsProduct)
 
-permutations = findPermutations(branches)
-print('permutations =>', permutations)
+combinations = findCombinations(branches)
+print('combinations =>', combinations)
 
