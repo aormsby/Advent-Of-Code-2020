@@ -39,24 +39,60 @@ def decodeMemory(groups):
 
     for g in groups:
         baseMask = g[0]
-        dualMask = int(baseMask.replace('X', '1'), 2)
-        print('mask:', bin(dualMask))
+        indeXes = [i for i,x in enumerate(baseMask) if x == 'X']
+        xCombos = list(product('01', repeat=len(indeXes)))
+        for i in range(len(xCombos)):
+            xCombos[i] = tuple(int(x) for x in xCombos[i])
+        # print('indeXes:', indeXes)
+        # print('xCombos:', xCombos)
 
+        bitCheckMasks = [(1 << 35 - X) for X in indeXes]
+        # print('bc masks:', bitCheckMasks)
+
+        orMask = int(baseMask.replace('X', '0'), 2)
+        
+        # apply all mask possibilities and store value in each mem space
         for i in range(1, len(g)):
-            ind = g[i][0]
-            num = g[i][1]
-            ind &= dualMask
-            ind |= dualMask
-            print('new mem:', ind)
-            # output[ind] = num
-    
+            mem = g[i][0]   # mem index to manipulate
+            val = g[i][1]   # value to save
+            mem |= orMask  # initial OR with 0s
+            # print('or\'d mem:', bin(mem))
+
+            xBitStatus = tuple((mem & mask) for mask in bitCheckMasks)
+            # print('x bit status:', xBitStatus)
+            
+            for xc in xCombos:
+                memCopy = mem
+                # print()
+                for j in range(0, len(xc)):
+                    target = xc[j]
+                    status = xBitStatus[j]
+                    # print('indeX', indeXes[j], 'target', target, 'status', status)
+
+                    if target == 0 and status == 0:
+                        pass
+                    elif target == 1 and status != 0:
+                        pass
+                    else:
+                            mask = 1 << 35 - indeXes[j]
+                            # print('b:', bin(memCopy))
+                            # print('m:', bin(mask))
+                            memCopy ^= mask
+
+                    # print('a:', bin(memCopy))
+                    # print(memCopy)
+                    # print()
+                # print()
+
+                output[memCopy] = val
     return output
             
 
 #######
 
-maskingGroups = readMaskGroups('test1.txt')
-# maskingGroups = readMaskGroups('init.txt')
+# maskingGroups = readMaskGroups('test1.txt')
+# maskingGroups = readMaskGroups('test2.txt')
+maskingGroups = readMaskGroups('init.txt')
 # for g in maskingGroups:
 #     print(g)
 
