@@ -1,10 +1,4 @@
 def setupGame(starters):
-    # start = {n:[starters.index(n) + 1, 0] for n in starters}
-    # last = starters[-1]
-    # lastT = len(starters)   # for 0
-    # return start, last, lastT
-
-
     startN = {}
     for s in range(len(starters)):
         startN.update({starters[s] : [s+1, 1]})
@@ -32,13 +26,14 @@ def playGame(input, limit):
         # print('memory', memory)
 
         if memory[1] == 0:  # last num *not* spoken before
-            numDict.update({lastNum : [memory[0], 1]})
+            memory[1] = 1
+            numDict.update({lastNum : memory})
             nextNum = 0
         elif memory[1] == 1:   # last num spoken before
             turnsDiff = turn - memory[0]
             # print('diff', turnsDiff)
-
-            numDict.update({lastNum : [turn, 1]})
+            memory[0] = turn
+            numDict.update({lastNum : memory})
             nextNum = turnsDiff
 
         if numDict.get(nextNum) is None:
@@ -53,6 +48,8 @@ def playGame(input, limit):
 
 
 ###################
+import time
+startTime = time.time()
 
 # numsInput = [0, 3, 6]  # test 1
 # numsInput = [1, 3, 2]  # test 2
@@ -61,8 +58,6 @@ numsInput = [0,5,4,1,10,14,7]  # input
 result1 = playGame(numsInput, 2020)
 print('result 1 =>', result1)
 
-import time
-startTime = time.time()
 result2 = playGame(numsInput, 30000000)
 print('result 2 =>', result2)
 print(time.time() - startTime)
