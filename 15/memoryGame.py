@@ -1,50 +1,42 @@
 def setupGame(starters):
     startN = {}
-    for s in range(len(starters)):
-        startN.update({starters[s] : [s+1, 1]})
-    
-    # for first check of last num after starters to get 0, goal is simpler logic
-    startN.update({starters[-1] : [len(starters), 0]})
+    for s in range(len(starters)-1):
+        startN.update({starters[s] : s+1})
 
-    lastN = starters[-1]
+    nextN = starters[-1]
     turnCount = len(starters)
 
-    return startN, lastN, turnCount
+    return startN, nextN, turnCount
 
 def playGame(input, limit):
-    numDict, lastNum, turn = setupGame(input)
+    numDict, nextNum, turn = setupGame(input)
     # print(numDict)
-    # print('last num:', lastNum)
     # print('turn:', turn)
+    # print('this num:', nextNum)
     # print()
 
     while turn < limit:
-    # while turn <= 10:
-        memory = numDict.get(lastNum)
+    # while turn < 10:
+        memory = numDict.get(nextNum)
         # print('turn', turn)
-        # print('num', lastNum)
+        # print('this num', nextNum)
         # print('memory', memory)
 
-        if memory[1] == 0:  # last num *not* spoken before
-            memory[1] = 1
-            numDict.update({lastNum : memory})
+        if memory is None:  # this num *not* spoken before
+            numDict[nextNum] = turn
             nextNum = 0
-        elif memory[1] == 1:   # last num spoken before
-            turnsDiff = turn - memory[0]
+        else:   # last num spoken before
+            turnsDiff = turn - memory
             # print('diff', turnsDiff)
-            memory[0] = turn
-            numDict.update({lastNum : memory})
+            numDict[nextNum] = turn
             nextNum = turnsDiff
 
-        if numDict.get(nextNum) is None:
-            numDict.update({nextNum : [turn+1, 0]})
-
+        # print('next num', nextNum)
         # print()
 
-        lastNum = nextNum
         turn += 1
     
-    return lastNum
+    return nextNum
 
 
 ###################
@@ -60,4 +52,5 @@ print('result 1 =>', result1)
 
 result2 = playGame(numsInput, 30000000)
 print('result 2 =>', result2)
+
 print(time.time() - startTime)
