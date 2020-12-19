@@ -84,35 +84,22 @@ def runCycles(start, numCycles):
         # for ra in ranges:
         #     print(*ra)
 
-        # for z, x, y in itertools.product(*ranges):
-        for z in list(ranges[0]):
-            for x in list(ranges[1]):
-                for y in list(ranges[2]):
+        for z, x, y in itertools.product(*ranges):
+            curVal = copy.copy(curCycle[z][x][y])
+            # print(z, x, y, curVal)
+            # print(nextCycle[z][x][y], '\n')
+            
+            adjacentPointVals = [curCycle[a][b][c] for a,b,c in adjPoints(z, x, y)]
+            # print([curVal], ':', z,x,y, '\n', adjacentPointVals)
 
+            numHash = adjacentPointVals.count('#')
 
-                    curVal = copy.copy(curCycle[z][x][y])
-                    # print(z, x, y, curVal)
-                    # print(nextCycle[z][x][y], '\n')
-                    
-                    adjacentPointVals = [curCycle[a][b][c] for a,b,c in adjPoints(z, x, y)]
-                    # adjacentPointVals = []
-                    # for zA in range(z-1, z+2):
-                    #     for xA in range(x-1, x+2):
-                    #         for yA in range(y-1, y+2):
-                    #             adjacentPointVals.append(curCycle[zA][xA][yA])
-                    # adjacentPointVals.remove(curCycle[z][x][y])
-                                
-                    # print([curVal], ':', z,x,y, '\n', adjacentPointVals)
-
-                    numHash = adjacentPointVals.count('#')
-
-                    if curVal == '.' and numHash == 3:
-                        curVal = '#'
-                    elif curVal == '#' and numHash != 2 and numHash != 3:
-                        curVal = '.'
-                    
-                    # i have no idea why x - 1 helps
-                    nextCycle[z][x][y] = curVal
+            if curVal == '.' and numHash == 3:
+                curVal = '#'
+            elif curVal == '#' and numHash != 2 and numHash != 3:
+                curVal = '.'
+            
+            nextCycle[z][x][y] = curVal
 
 
         # bounds expand

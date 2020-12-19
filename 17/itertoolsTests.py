@@ -15,6 +15,12 @@ def generateEmptyRows(sliceWidth, numRows=2):
 def generatePadding(amount=2):
     return list(itertools.repeat('.', amount))
 
+def generateEmptyCube(cube):
+    empty = []
+    for i in range(len(cube)):
+        empty.append(generateEmptyZSpace(cube[0]))
+    return empty
+
 def printSlice(slice, text=''):
     print(text)
     for s in slice:
@@ -26,6 +32,15 @@ def printCube(cube, text=''):
     for c in cube:
         for s in c:
             print(*s)
+    print()
+
+def printWCube(wCube, text=''):
+    print(text)
+    for w in wCube:
+        for c in w:
+            print()
+            for s in c:
+                print(*s)
     print()
 
 #region - rows tests
@@ -68,3 +83,16 @@ cube[2][2][2] = '#'
 
 printCube(cube, 'z level after')
 #endregion - z level tests
+
+wCube = [generateEmptyCube(cube), generateEmptyCube(cube)]
+printWCube(wCube, 'w before:')
+
+wCube[0][0][0][0] = '#'
+wCube[0][1][1][2] = '#'
+wCube[0][2][2][2] = '#'
+
+wCube[1][0][2][2] = '#'
+wCube[1][1][1][0] = '#'
+wCube[1][2][2][1] = '#'
+
+printWCube(wCube, 'w after:')
