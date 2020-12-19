@@ -5,8 +5,12 @@ def generateEmptyZSpace(slice):
     return [['.' for y in x] for x in slice]
 
 def generateEmptyRows(sliceWidth, numRows=2):
-    # return ['.' for y in range(sliceWidth)]
-    return [*itertools.repeat(['.' for y in range(sliceWidth)], numRows)]
+    # return [*itertools.repeat(['.' for y in range(sliceWidth)], numRows)]
+    emptyRows = []
+    singleRow = ['.' for y in range(sliceWidth)]
+    for i in range(numRows):
+        emptyRows.append(copy.deepcopy(singleRow))
+    return emptyRows
 
 def generatePadding(amount=2):
     return list(itertools.repeat('.', amount))
@@ -113,13 +117,13 @@ def runCycles(start, numCycles):
 
         # bounds expand
         for zSlice in nextCycle:
-            if '#' in zSlice[0] or '#' in zSlice[-1]:
+            if '#' in zSlice[1] or '#' in zSlice[-2]:
                 nextCycle = expandSlices(nextCycle, 6)
                 break
             else:     # check side columns
                 ind = 0
                 while ind < len(zSlice[0]):
-                    if zSlice[ind][0] == '#' or zSlice[ind][-1] == '#':
+                    if zSlice[ind][1] == '#' or zSlice[ind][-2] == '#':
                         nextCycle = expandSlices(nextCycle, 6)
                         break
                     ind += 1
@@ -133,7 +137,7 @@ def runCycles(start, numCycles):
             nextCycle.append(generateEmptyZSpace(nextCycle[0]))
 
         # @ end of cycle
-        if cycleCount == 5:
+        if cycleCount == 6:
             for nz in nextCycle:
                 for nx in nz:
                     print(*nx)
@@ -147,5 +151,6 @@ def runCycles(start, numCycles):
 
 ########
 
-startCycle = setupStartCycle('test1.txt')
+# startCycle = setupStartCycle('test1.txt')
+startCycle = setupStartCycle('slice.txt')
 lastCycle = runCycles(startCycle, 6)
