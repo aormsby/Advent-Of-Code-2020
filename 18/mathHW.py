@@ -1,21 +1,36 @@
+import math
+
 def collectExpressions(filename):
     return [[splitEx for splitEx in ex.strip('\n') if splitEx != ' ']
         for ex in open(filename).readlines()]
 
+def evalAdv(c):
+    for i in range(len(c)):
+        if c[i] == '+':
+            c = c[:i-1] + [int(c[i-1]) + int(c[i+1])] + c[i+2:]
+            c = evalAdv(c)
+            break
+
+    return c
+
 # input expression chunk, calc left to right, return value
-def evalChunkLTR(chunk):    
-    if len(chunk) > 1:
-        n1 = chunk[0]
-        n2 = chunk[2]
-        op = chunk[1]
-        # print(n1, op, n2)
+def evalChunkLTR(chunk, advanced=False):
+    if advanced:
+        chunk = evalAdv(chunk)
+        chunk = [math.prod([int(n) for n in chunk if n != '*'])]
+    else:
+        if len(chunk) > 1:
+            n1 = chunk[0]
+            n2 = chunk[2]
+            op = chunk[1]
+            # print(n1, op, n2)
 
-        if op == '*':
-            chunk = [int(n1) * int(n2)] + chunk[3:]
-        if op == '+':
-            chunk = [int(n1) + int(n2)] + chunk[3:]
+            if op == '*':
+                chunk = [int(n1) * int(n2)] + chunk[3:]
+            if op == '+':
+                chunk = [int(n1) + int(n2)] + chunk[3:]
 
-        chunk = evalChunkLTR(chunk)
+            chunk = evalChunkLTR(chunk)
 
     return chunk
 
@@ -45,7 +60,7 @@ def evalChunkLTR(chunk):
 
 
 # eval parens inside to out, replace chunks with with ouput
-def evalParenIn2Out(ex):
+def evalParenIn2Out(ex, advanced):
     # no parentheses, early out
     if '(' not in ex and ')' not in ex:
         return ex
@@ -63,28 +78,28 @@ def evalParenIn2Out(ex):
     # print(*ex)
     # print('ppos:', *pPos)
     if -1 not in pPos:
-        ex = ex[:pPos[0]] + [*evalChunkLTR(ex[pPos[0]+1:pPos[1]])] + ex[pPos[1]+1:]
+        ex = ex[:pPos[0]] + [*evalChunkLTR(ex[pPos[0]+1:pPos[1]], advanced)] + ex[pPos[1]+1:]
         # print(*ex)
         # print()
-        ex = evalParenIn2Out(ex)
+        ex = evalParenIn2Out(ex, advanced)
 
     return ex
 
 # evaluate entire expression in steps
 # 1 - parentheses replacements (calculated inners)
 # 2 - full ltr expression eval
-def evalExpression(expr):
+def evalExpression(expr, advanced=False):
     # print(expr)
-    expr = evalParenIn2Out(expr)
-    output = evalChunkLTR(expr)[0]
+    expr = evalParenIn2Out(expr, advanced)
+    output = evalChunkLTR(expr, advanced)[0]
 
     return output
 
 # collect and sum expression values
-def sumExpressionResults(exprList):
+def sumExpressionResults(exprList, advanced=False):
     sum = 0
     for e in exprList:
-        sum += evalExpression(e)
+        sum += evalExpression(e, advanced)
     return sum
 
 #####
@@ -96,3 +111,6 @@ expressions = collectExpressions('expressions.txt')
 
 sumExpressions = sumExpressionResults(expressions)
 print('sum expressions:', sumExpressions)
+
+advancedSum = sumExpressionResults(expressions, True)
+print('advanced sum:', advancedSum)
