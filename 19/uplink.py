@@ -9,16 +9,21 @@ def readInput(filename):
         data = re.search(r'(\d+): (.+)', h)
         d2 = data.group(2).strip('"')#.replace(' | ', '|').replace(' ', '')
         if '|' in d2:
-            d2 = '(' + d2 + ')'
+            d2 = '( ' + d2 + ' )'
+        # print(d2)
         # else:
         #     d2 = d2.split(' ')
         ruleset.update({data.group(1) : d2})
     # print(ruleset)
 
+    # for k,v in zip(ruleset.keys(), ruleset.values()):
+    #     print(k,v)
+
     return ruleset, halves[1]
 
 def decodeRules(rules):
-    letterKeys = dict(filter(lambda item: re.match(r'^[ab| \(\)]+$', str(item[1])), rules.items()))
+    letterKeysPattern = r'^[ab| \(\)\+]+$'
+    letterKeys = dict(filter(lambda item: re.match(letterKeysPattern, str(item[1])), rules.items()))
     # print('lk:', letterKeys)
     ruleItems = dict(filter(lambda item: item not in letterKeys.items(), rules.items()))
     # print('ri:', ruleItems)
@@ -30,8 +35,10 @@ def decodeRules(rules):
                 rule = ruleItems.get(rk)
                 if lk[0] in rule:
 
-                    lkupdate = lk[1]
-                    # print(lk[0])
+                keyCheck = re.search(rf'\D*{lk[0]}\D*', rule)
+
+                if keyCheck is not None:
+                    # print('lk[0]:', lk[0])
                     regexp = rf'(?:(?=\D)|(?<=\b))({lk[0]})(?:(?=\D)|(?=\b))'
                     # print('regexp:', regexp)
 
@@ -44,7 +51,7 @@ def decodeRules(rules):
 
                     ruleItems.update({rk : rule})
 
-        newLKeys = dict(filter(lambda item: re.match(r'^[ab| \(\)]+$', str(item[1])), ruleItems.items()))
+        newLKeys = dict(filter(lambda item: re.match(letterKeysPattern, str(item[1])), ruleItems.items()))
         ruleItems = dict(filter(lambda item: item not in newLKeys.items(), ruleItems.items()))
         letterKeys.update(newLKeys)
 
@@ -57,8 +64,10 @@ def decodeRules(rules):
     return letterKeys
 
 def validateMessages(zRule, messages):
-    # print(zRule)
+    # non-capture groups, yo
+    zRule = zRule.replace(' ', '').replace('(', '(?:')
     pattern = rf'^{zRule}$'
+    # print(pattern)
     valid = []
     for m in messages:
         check = re.match(pattern, m)
@@ -67,17 +76,19 @@ def validateMessages(zRule, messages):
     return valid
 
 ##############
-
+import time
+start = time.time()
 # rules, receivedMessages = readInput('test0.txt')
 # rules, receivedMessages = readInput('test1.txt')
-rules, receivedMessages = readInput('satelliteData.txt')
+rules, receivedMessages = readInput('test2.txt')
+# rules, receivedMessages = readInput('satelliteData.txt')
+# rules, receivedMessages = readInput('satelliteData2.txt')
 # print(rules, '\n', receivedMessages)
 
 decodedRules = decodeRules(rules)
 # print(decodedRules.get('0'))
 
-# combos = prepCombinations([decodedRules.get('0').replace(' ', '')])
-# print('combos:', combos)
-
-validMessages = validateMessages(decodedRules.get('0').replace(' ', ''), receivedMessages)
+validMessages = validateMessages(decodedRules.get('0'), receivedMessages)
 print('num valid messages =>', len(validMessages))
+
+print(time.time() - start)
