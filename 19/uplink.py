@@ -56,35 +56,6 @@ def decodeRules(rules):
     # print(letterKeys)
     return letterKeys
 
-def prepCombinations(zrule):
-    # print(zrule)
-
-    # from root list find all regex matches with no nested lists
-
-    # while there are still any *string* parenthesis left in zrule ...
-    while any(z for z in zrule if '(' in z or ')' in z):
-        # print(zrule)
-        for elem in range(len(zrule)):
-            innermostLists = set(re.findall(r'\([^\(\)]+\)', zrule[elem]))
-            # print(innermostLists)
-            # for il in innermostLists:
-
-            
-        return -1
-
-    # while len(innermostLists) > 0:
-    #     print(zrule[0].index(innermostLists[0]))
-    #     print(innermostLists)
-    #     for i in innermostLists:
-    #         index = zrule[0].index(i)
-    #         # zrule[0] = zrule[0].split(i)
-    #         i = i.strip('[]').split('|')
-    #         print(i)
-    #         zrule[0] = [zrule[0][:index]], i, [zrule[0][index+ilen:]]
-    #         print(zrule)
-
-    #     return
-
 def validateMessages(zRule, messages):
     # print(zRule)
     pattern = rf'^{zRule}$'
