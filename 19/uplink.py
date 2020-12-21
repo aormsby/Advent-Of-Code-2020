@@ -6,22 +6,22 @@ def readInput(filename):
 
     ruleset = {}
     for h in halves[0]:
-        data = re.search(r'(\d): (.+)', h)
-        d2 = data.group(2).strip('"').replace(' | ', '|').replace(' ', '')
-        # if '|' in d2:
-        #     d2 = d2.split('|')
+        data = re.search(r'(\d+): (.+)', h)
+        d2 = data.group(2).strip('"')#.replace(' | ', '|').replace(' ', '')
+        if '|' in d2:
+            d2 = '(' + d2 + ')'
         # else:
         #     d2 = d2.split(' ')
         ruleset.update({data.group(1) : d2})
-    print(ruleset)
+    # print(ruleset)
 
     return ruleset, halves[1]
 
 def decodeRules(rules):
-    letterKeys = dict(filter(lambda item: re.match(r'^[ab|_ ]+$', str(item[1])), rules.items()))
+    letterKeys = dict(filter(lambda item: re.match(r'^[ab| \(\)]+$', str(item[1])), rules.items()))
+    # print('lk:', letterKeys)
     ruleItems = dict(filter(lambda item: item not in letterKeys.items(), rules.items()))
-    print(letterKeys)
-    print(ruleItems)
+    # print('ri:', ruleItems)
     
     while len(ruleItems) > 0:
 
@@ -29,29 +29,84 @@ def decodeRules(rules):
             for lk in letterKeys.items():
                 rule = ruleItems.get(rk)
                 if lk[0] in rule:
+
                     lkupdate = lk[1]
-                    if '|' in lkupdate:
-                        lkupdate = ' ' + lkupdate + ' '
-                    rule = rule.replace(lk[0], lkupdate)
+                    # print(lk[0])
+                    regexp = rf'(?:(?=\D)|(?<=\b))({lk[0]})(?:(?=\D)|(?=\b))'
+                    # print('regexp:', regexp)
+
+                    repl = lk[1]
+                    # print('repl:', repl)
+
+                    # print('before:', rule)
+                    rule = re.sub(regexp, repl, rule)
+                    # print('after:', rule)
+
                     ruleItems.update({rk : rule})
-        
-        newLKeys = dict(filter(lambda item: re.match(r'^[ab|_ ]+$', str(item[1])), ruleItems.items()))
+
+        newLKeys = dict(filter(lambda item: re.match(r'^[ab| \(\)]+$', str(item[1])), ruleItems.items()))
         ruleItems = dict(filter(lambda item: item not in newLKeys.items(), ruleItems.items()))
-        newLKeys = map(lambda item: (item[0], item[1] if item[0] != '0' else item[1]), newLKeys.items())
         letterKeys.update(newLKeys)
-        # print(letterKeys)
-        # print(ruleItems)
+
+        # print('nlk:', newLKeys)
+        # print('lk:', letterKeys)
+        # print('ri:', ruleItems)
+        # return {}
 
     # print(letterKeys)
     return letterKeys
 
+def prepCombinations(zrule):
+    # print(zrule)
+
+    # from root list find all regex matches with no nested lists
+
+    # while there are still any *string* parenthesis left in zrule ...
+    while any(z for z in zrule if '(' in z or ')' in z):
+        # print(zrule)
+        for elem in range(len(zrule)):
+            innermostLists = set(re.findall(r'\([^\(\)]+\)', zrule[elem]))
+            # print(innermostLists)
+            # for il in innermostLists:
+
+            
+        return -1
+
+    # while len(innermostLists) > 0:
+    #     print(zrule[0].index(innermostLists[0]))
+    #     print(innermostLists)
+    #     for i in innermostLists:
+    #         index = zrule[0].index(i)
+    #         # zrule[0] = zrule[0].split(i)
+    #         i = i.strip('[]').split('|')
+    #         print(i)
+    #         zrule[0] = [zrule[0][:index]], i, [zrule[0][index+ilen:]]
+    #         print(zrule)
+
+    #     return
+
+def validateMessages(zRule, messages):
+    # print(zRule)
+    pattern = rf'^{zRule}$'
+    valid = []
+    for m in messages:
+        check = re.match(pattern, m)
+        if check is not None:
+            valid.append(m)
+    return valid
 
 ##############
 
-# rules, messages = readInput('test0.txt')
-rules, messages = readInput('test1.txt')
-# rules, messages = readInput('satelliteData.txt')
-# print(rules, '\n', messages)
+# rules, receivedMessages = readInput('test0.txt')
+# rules, receivedMessages = readInput('test1.txt')
+rules, receivedMessages = readInput('satelliteData.txt')
+# print(rules, '\n', receivedMessages)
 
 decodedRules = decodeRules(rules)
-print(decodedRules)
+# print(decodedRules.get('0'))
+
+# combos = prepCombinations([decodedRules.get('0').replace(' ', '')])
+# print('combos:', combos)
+
+validMessages = validateMessages(decodedRules.get('0').replace(' ', ''), receivedMessages)
+print('num valid messages =>', len(validMessages))
